@@ -639,33 +639,6 @@ pub fn date_ticker() -> Scene {
             },
             None,
         ),
-        Generator::init(
-            772,
-            Condition::All(vec![Condition::Every(4), Condition::Before(1024)]),
-            None,
-            |_, beat: i32, context: &mut Context<'_>| {
-                let mut rng: ThreadRng = rand::rng();
-                context.canvas.set_string(
-                    Vector2::init(27, 15),
-                    &work_out_date(rng.random_range::<i32, _>(64 * 12 + beat * 8..=64 * 12 + beat * 24), 0),
-                    &ansi_code(Fore::Yellow, Style::Bright)
-                );
-            },
-            None,
-        ),
-        Generator::init(
-            1024,
-            Condition::Always,
-            None,
-            |_, beat: i32, context: &mut Context<'_>| {
-                context.canvas.set_string(
-                    Vector2::init(27, 15),
-                    &work_out_date(64 * 16 + beat * 64 - 64 * 16 * 32, 0),
-                    &ansi_code(Fore::Yellow, Style::Bright)
-                );
-            },
-            None,
-        ),
     ])
 }
 
@@ -844,6 +817,15 @@ pub fn weather() -> Scene {
             |_, _, context: &mut Context<'_>| {
                 let known_weathers: &mut [Weather; 5] = context.scene_data.get_mut::<[Weather; 5]>("known_weathers")
                     .expect("known_weathers not found");
+
+                // Intentional change from the original Python: after the connection-loss message,
+                // randomize and redraw the date with the weather instead of using the dates scene.
+                known_weathers[2].date.mutate();
+                context.canvas.set_string(
+                    Vector2::init(27, 15),
+                    &known_weathers[2].date.as_string(),
+                    &ansi_code(Fore::Yellow, Style::Bright)
+                );
                 render_weather(
                     context.canvas,
                     Vector2::init(27, 17),
@@ -861,12 +843,20 @@ pub fn weather() -> Scene {
             |_, beat: i32, context: &mut Context<'_>| {
                 let known_weathers: &mut [Weather; 5] = context.scene_data.get_mut::<[Weather; 5]>("known_weathers")
                     .expect("known_weathers not found");
+                let chance: f64 = ((beat - 1080) as f64 * 2.2).max(0.0);
+
+                known_weathers[3].date.mutate();
+                context.canvas.set_string(
+                    Vector2::init(27, 15),
+                    &replace_text_with_spaces(&known_weathers[3].date.as_string(), chance),
+                    &ansi_code(Fore::Yellow, Style::Bright)
+                );
                 render_weather(
                     context.canvas,
                     Vector2::init(27, 17),
                     &mut known_weathers[3],
                     1,
-                    ((beat - 1080) as f64 * 2.2).max(0.0)
+                    chance
                 );
             },
             None,

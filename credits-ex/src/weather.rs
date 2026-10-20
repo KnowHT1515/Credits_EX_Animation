@@ -53,6 +53,30 @@ pub enum WindDirection {
     NW,
 }
 
+impl Date {
+
+    pub fn as_string(&self) -> String {
+        format!("{:02}.{:02}.{:04}", self.day, self.month, self.year)
+    }
+
+    pub fn mutate(&mut self) {
+        let mut rng: ThreadRng = rand::rng();
+
+        self.year = rng.random_range::<u32, _>(2001..=2099);
+        self.month = rng.random_range::<u32, _>(1..=12);
+
+        let leap_year: bool = self.year % 4 == 0 && (self.year % 100 != 0 || self.year % 400 == 0);
+        let max_days: u32 = match self.month {
+            2 if leap_year => 29,
+            2 => 28,
+            4 | 6 | 9 | 11 => 30,
+            _ => 31,
+        };
+        self.day = rng.random_range::<u32, _>(1..=max_days);
+    }
+
+}
+
 impl WeatherKind {
 
     pub fn as_str(&self) -> &'static str {
