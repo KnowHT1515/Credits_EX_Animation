@@ -1,0 +1,12 @@
+{
+    "font": {
+        "face": "Consolas",
+        "size": 16,
+        "weight": "normal",
+        "features": {
+            "liga": 0,
+            "calt": 0
+        }
+    },
+    "intenseTextStyle": "bright"
+}
